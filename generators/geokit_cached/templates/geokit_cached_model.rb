@@ -1,5 +1,5 @@
 class <%= class_name %> < ActiveRecord::Base
-  include geokit_cached
+  include GeokitPlugins::GeokitCached
   # config options for to_xml
   XML_OPTIONS = {:include => [], :except => [] + self.protected_attributes().to_a, :methods => [:geocoding_errors]}
   

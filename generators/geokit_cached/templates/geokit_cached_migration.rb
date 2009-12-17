@@ -16,7 +16,7 @@ class <%= migration_name.underscore.camelize %> < ActiveRecord::Migration
       end
       
       <% unless options[:skip_timestamps] %>
-            t.timestamps
+      t.timestamps
       <% end -%>
     end
   end

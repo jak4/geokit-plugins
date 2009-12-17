@@ -1,4 +1,3 @@
-require 'plugins/geokit_cached'
 if defined? Geokit
   require 'plugins/geokit_cached'
 else
