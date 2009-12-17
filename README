@@ -1,13 +1,63 @@
 Geokit-plugins
 ==============
 
-Introduction goes here.
+Geokit-plugins provide a clean and easy way to:
+ *) develop additional functionality (which doesn't belong into the geokit-core, e.g. caching of lookups) for the geokit-gem by Andre and
+ *) share your plugins with the rest of the world via this or forked repositories.
+ 
+ In order to utilize the geokit-plugins plugin ;) you will have to use my forked and modified version of geokit-gem. You can find it here: http://github.com/jak4/geokit-gem.
+ This is not an ideal situation since it would be much cooler to integrate it with the orginal geokit-gem, but maybe over time Andre will change his mind (hint hint).
+ 
+How does it work?
+=================
 
+My modified geokit-gem provides a standardized way to integrate external classes. Much of this code has already been in the geokit-gem but for other purposes. 
+I took this code and created the plugin mechanism. Via this interface all external classes can be passed into the geocoder via the MultiGeocoder configuration and will then be
+used as all internal geocoders would be. There is really no difference, or at least there shouldn't be.
+
+All you really have to do is to install the geokit-plugin plugin and decide which plugin you want to use. Right now the following plugins are available (only one ;():
+ 1) geokit_chached
+ 
+Then you setup your desired plugin by running the rails generator like so: "script/generate geokit_cached ModelName"
+
+Voila, your done!
 
 Example
 =======
 
-Example goes here.
+Since there is currently only one plugin let's setup this plugin.
+
+1) script/plugin install git://github.com/jak4/geokit-plugins.git
+2) script/generate geokit_cached geokit_cached
+3) rake db:migrate
+4) add the following in initializers/geokit_config.rb: 
+   Geokit::Geocoders::plugins = [{:plugin_name => :db, :model => :geokit_cached, :find => :find_location, :save => :save_location}]
+5) enable and modify the Multigeocoder-Configuration in initializers/geokit_config.rb
+   Geokit::Geocoders::provider_order = [:db,:google]
+   
+That's it. Now your external plugin is setup and ready to go.
 
 
-Copyright (c) 2009 [name of plugin creator], released under the MIT license
+geokit_cached
+=============
+
+Currently it is a rather crude implementation which does a lookup via find_by_city_and_street_name_and_street_number(city, street_name, street_number) in the database.
+This of course implies that this plugin only works with ActiveRecord and probably always will.
+
+If a lookup is successful it will return a GeoLoc object as a normal geocoder would. The only difference is that the provider will be all upcase.
+So, if the original provider was "google" the returned cached location will be the same except that the provider will be "GOOGLE".
+
+If a lookup is not successful it will get handled by the next Geocoder in the Multigeocoder-Order. This is same behaviour as before. The only difference is that if an address could
+finally successfully be geocoded a callback to the geokit_cached class will be dispatched. The geokit_chached class will try to save the geocoded location to the database.
+If this is for whatever reason not successfull you will still receive the geocoded object and only an error/warning message will be generated. But this depends on the state the geokit-gem plugin
+is currently in. So chances are you will not notice something going wrong in the plugin. So verify that the plugin really gets called and hits the database in the expected way.
+
+
+Final Words
+===========
+
+Go and fork your hearts out and create as many plugins as you can. Currently the plugin interface is more or less oriented towards caching but this is of course something that can and will change over time
+
+Enjoy!
+
+Copyright (c) 2009 Johannes Kaefer, released under the MIT license
